@@ -1,7 +1,7 @@
 # Langsame Nachrichten — Brainstorm
 
 **Date:** 2026-02-23
-**Status:** Complete
+**Status:** Complete — MVP implemented 2026-02-24
 
 ## What We're Building
 
@@ -49,11 +49,11 @@ Speed control is **separate** — the HTML5 audio player provides playback rate 
 | **Backend** | Python + GitHub Actions (daily cron) | Free hosting, no running server, outputs static files |
 | **Hosting** | GitHub Pages | Free, simple, serves static JSON + audio files |
 | **News source** | Deutsche Welle (primary) + Tagesschau (secondary) | Authentic German, free, international-audience content |
-| **LLM provider** | Configurable / pluggable | Abstracted behind an interface — swap between Claude, GPT-4o-mini, etc. to optimize cost vs. quality |
-| **TTS provider** | Configurable / pluggable | Support both premium (ElevenLabs, OpenAI TTS) and free (Google Cloud TTS, browser) options for experimentation |
+| **LLM provider** | OpenAI directly (gpt-4o-mini) | No abstraction for MVP — switch by editing code. Model configurable via `LLM_MODEL` env var |
+| **TTS provider** | OpenAI TTS directly (tts-1, nova) | No abstraction for MVP — voice configurable via `TTS_VOICE` env var |
 | **Difficulty model** | 5 levels, vocabulary/grammar based, progressive layers | Each level expands on the previous. Speed is a separate control |
 | **Content cadence** | Daily digest, 3-5 stories | Runs at 6 AM AEDT (Melbourne timezone). Like a morning newspaper |
-| **Content retention** | 7 days in repo, UI shows today only | Old content auto-pruned by the GitHub Action to keep repo size manageable |
+| **Content retention** | Today only, full site redeploy | Each build deploys a complete self-contained site. No persistence between runs |
 | **User state** | None | Radio model — open, pick a level, listen. No accounts, no tracking, no persistence |
 | **Level selection** | Global setting | One level selector at the top applies to all stories |
 | **Text display** | Hidden by default, toggle to reveal | Audio-first experience. German text and English translation each behind separate toggles |
@@ -86,28 +86,27 @@ Speed control is **separate** — the HTML5 audio player provides playback rate 
 ### Daily Batch Output Structure
 
 ```
-content/
-  2026-02-23/
-    digest.json          # Metadata: headlines, descriptions, level info
-    story-1/
-      level-1.json       # German text + English translation
-      level-1.mp3        # TTS audio
-      level-2.json
-      level-2.mp3
-      ...
-      level-5.json
-      level-5.mp3
-    story-2/
-      ...
+output/
+  content/
+    latest.json            # Copy of today's digest (PWA fetches this)
+    2026-02-23/
+      digest.json          # All story text + metadata in one file
+      {article-id}/
+        level-1.mp3        # TTS audio per level (48kbps mono)
+        level-2.mp3
+        ...
+        level-5.mp3
+      {article-id}/
+        ...
 ```
 
-## Open Questions
+## Open Questions (Resolved)
 
-- **LLM prompt design:** The progressive-layer prompt needs careful engineering to ensure each level genuinely builds on the previous one rather than being an independent rewrite. May need iterative tuning.
-- **TTS voice selection:** Which German voice sounds best at slow speeds? Needs experimentation with different providers.
-- **DW RSS feed reliability:** Need to verify DW's RSS feed structure and how many usable world-news stories it provides daily. May need a fallback strategy if feed is sparse some days.
-- **Audio file size budget:** 25 MP3 files per day at ~30-60 seconds each — need to verify this stays within GitHub Pages' soft limits and repo size guidelines.
-- **PWA icon and branding:** "Langsame Nachrichten" needs a nice home screen icon. Could be a simple typographic mark or a small illustrated logo.
+- ~~**LLM prompt design:**~~ Resolved — top-down CEFR-aligned sequential prompting (C1→A1) with explicit grammar inventories per level. See `backend/prompts.py`.
+- ~~**TTS voice selection:**~~ Using OpenAI `nova` voice. Configurable via `TTS_VOICE` env var.
+- ~~**DW RSS feed reliability:**~~ Verified — RSS `id` field gives article IDs directly, DW JSON API returns full text. Feed consistently has ~85 entries.
+- ~~**Audio file size budget:**~~ OpenAI TTS outputs ~1 MB/min. ffmpeg re-encodes to 48kbps mono (~0.36 MB/min). TTS has 4096 char limit — handled by sentence-boundary chunking.
+- ~~**PWA icon and branding:**~~ SVG favicon with "LN" typographic mark in Fraunces. PNG icons still needed for full PWA install.
 
 ## Future Extensions (Not in v1)
 

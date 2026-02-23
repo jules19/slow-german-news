@@ -3,13 +3,18 @@ title: "feat: Build Langsame Nachrichten MVP"
 type: feat
 date: 2026-02-23
 deepened: 2026-02-23
+implemented: 2026-02-24
+status: complete
 ---
 
 # Build Langsame Nachrichten MVP
 
+> **Implementation complete** (2026-02-24): All phases built and verified. 37 unit tests passing. Pipeline tested end-to-end with real DW API + OpenAI. See git log for 10 incremental commits.
+
 ## Enhancement Summary
 
 **Deepened on:** 2026-02-23
+**Implemented on:** 2026-02-24
 **Research agents used:** 8 (architecture, performance, security, simplicity, python-review, LLM-prompts, DW-API, frontend-design)
 
 ### Critical Discoveries
@@ -740,10 +745,12 @@ Each deploy is a **complete site replacement**. No content accumulates across ru
 3. **Audio file sizes**: OpenAI TTS outputs ~1 MB/min. Re-encode via ffmpeg to 48kbps mono (~0.36 MB/min).
 4. **`playbackRate` on iOS**: Likely works on iOS 17+ per caniuse data, but Apple's archived docs say unsupported. **Must test on real iPhone before building full player.** Web Audio API fallback exists.
 
-## Remaining Open Questions
+## Remaining Open Questions (Post-MVP)
 
-1. **Which TTS voice sounds best for German news?** Generate samples with OpenAI `nova`, `echo`, and `onyx` voices and compare. Can be done as first implementation task.
-2. **Exact CEFR prompt wording**: The grammar inventories per level need iterative tuning. Start with the research-provided templates and adjust based on output quality.
+1. **Which TTS voice sounds best for German news?** MVP uses `nova`. Compare with `echo` and `onyx` in production.
+2. **CEFR prompt tuning**: Grammar inventories work well but higher levels (C1/B2) generate very long texts (~7000 chars). May want to add length constraints.
+3. **iOS playbackRate**: Needs real iPhone testing. Web Audio API fallback available if needed.
+4. **PWA icons**: Only SVG favicon exists. Need PNG icons (192x192, 512x512, apple-touch-icon-180) for full installability.
 
 ## Future Extensions (Not in MVP)
 
