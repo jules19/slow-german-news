@@ -164,8 +164,9 @@ async def generate_audio_for_story(
             continue
 
         audio_path, duration = result
-        # Store relative path from content root for the JSON
-        rel_path = str(Path(audio_path).relative_to(output_dir.parent))
+        # Store path relative to output root (includes content/ prefix for site URL)
+        output_root = output_dir.parent.parent  # output/content/{date} → output/
+        rel_path = str(Path(audio_path).relative_to(output_root))
         updated_levels[level_num] = replace(
             updated_levels[level_num],
             audio_url=rel_path,

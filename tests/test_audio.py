@@ -127,7 +127,8 @@ class TestGenerateAudioForStory:
 
             assert len(result.levels) == 2
             assert mock_gen.call_count == 2
-            # Audio URL should be a relative path from content root
+            # Audio URL should include content/ prefix for site serving
+            assert result.levels[1].audio_url.startswith("content/")
             assert "12345/level-1.mp3" in result.levels[1].audio_url
             assert result.levels[1].audio_duration_seconds == 10.5
 

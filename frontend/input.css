@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF7F2;
+  --color-surface: #F0EBE3;
+  --color-primary: #1C1917;
+  --color-secondary: #78716C;
+  --color-accent: #C2410C;
+  --color-accent-soft: #FFF7ED;
+  --color-border: #E7E5E4;
+  --color-player: #292524;
+  --color-player-text: #FAFAF9;
+
+  --font-headline: "Fraunces", serif;
+  --font-body: "Source Serif 4", serif;
+  --font-ui: "Source Sans 3", sans-serif;
+}
+
+/* Level pills */
+.level-pill {
+  @apply flex flex-col items-center justify-center px-2 py-1.5 rounded-lg font-ui text-xs font-semibold border border-border text-secondary transition-all cursor-pointer min-w-[52px];
+}
+.level-pill.active {
+  @apply bg-accent-soft border-accent text-accent;
+}
+.level-pill .level-num {
+  @apply text-sm leading-none;
+}
+.level-pill .level-label {
+  @apply text-[10px] leading-none mt-0.5;
+}
+
+/* Toggle buttons */
+.toggle-btn {
+  @apply font-ui text-sm font-semibold px-4 py-2 rounded-lg border border-border text-secondary transition-all cursor-pointer;
+}
+.toggle-btn.active {
+  @apply bg-accent text-white border-accent;
+}
+
+/* Speed buttons */
+.speed-btn {
+  @apply font-ui text-[11px] px-1.5 py-0.5 rounded text-player-text/50 transition-colors cursor-pointer;
+}
+.speed-btn.active {
+  @apply text-accent font-semibold;
+}
+
+/* Text reveal animation */
+.text-reveal {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+.text-reveal.visible {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+/* Story entry animation */
+.story-entry {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeUp 0.4s ease forwards;
+}
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

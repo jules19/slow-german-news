@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; media-src 'self'; img-src 'self'">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1C1917">
+  <title>Langsame Nachrichten</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png">
+  <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Source+Sans+3:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="bg-cream text-primary min-h-screen" style="padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)">
+  <div id="app" class="max-w-lg mx-auto px-6 pb-8">
+
+    <!-- Masthead -->
+    <header class="pt-8 pb-4">
+      <h1 class="font-headline text-2xl font-bold text-primary tracking-tight">Langsame Nachrichten</h1>
+      <div class="mt-1 border-t-2 border-primary"></div>
+      <div class="border-t border-primary mt-0.5"></div>
+      <p id="date-display" class="mt-3 font-ui text-sm text-secondary"></p>
+    </header>
+
+    <!-- Difficulty Selector -->
+    <nav id="level-selector" class="flex gap-2 mb-6" aria-label="Schwierigkeitsgrad">
+      <button data-level="1" class="level-pill" aria-label="Einfach">
+        <span class="level-num">1</span>
+        <span class="level-label">Einfach</span>
+      </button>
+      <button data-level="2" class="level-pill" aria-label="Leicht">
+        <span class="level-num">2</span>
+        <span class="level-label">Leicht</span>
+      </button>
+      <button data-level="3" class="level-pill" aria-label="Mittel">
+        <span class="level-num">3</span>
+        <span class="level-label">Mittel</span>
+      </button>
+      <button data-level="4" class="level-pill" aria-label="Schwer">
+        <span class="level-num">4</span>
+        <span class="level-label">Schwer</span>
+      </button>
+      <button data-level="5" class="level-pill" aria-label="Original">
+        <span class="level-num">5</span>
+        <span class="level-label">Original</span>
+      </button>
+    </nav>
+
+    <!-- Story List View -->
+    <main id="story-list"></main>
+
+    <!-- Story Detail View -->
+    <article id="story-detail" class="hidden">
+      <button id="back-btn" class="font-ui text-sm text-secondary mb-6 flex items-center gap-1 hover:text-primary transition-colors">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" class="inline"><path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Zurück
+      </button>
+
+      <h2 id="detail-headline" class="font-headline text-[26px] font-semibold leading-tight mb-4"></h2>
+
+      <div class="flex gap-3 mb-6">
+        <button id="toggle-german" class="toggle-btn">Deutsche Text</button>
+        <button id="toggle-english" class="toggle-btn">English</button>
+      </div>
+
+      <div id="german-text" class="text-reveal hidden">
+        <p id="german-content" class="font-body text-lg leading-[1.7] mb-6 whitespace-pre-line"></p>
+      </div>
+
+      <div id="english-text" class="text-reveal hidden">
+        <p id="english-content" class="font-body text-lg leading-[1.7] italic text-secondary mb-6 whitespace-pre-line"></p>
+      </div>
+
+      <div class="h-[120px]"></div>
+    </article>
+
+    <!-- Error State -->
+    <div id="error-state" class="hidden text-center py-16">
+      <p class="font-body text-lg italic text-secondary">Keine Nachrichten verfügbar.</p>
+      <p class="font-body text-base italic text-secondary mt-2">No news available. Please try again later.</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="text-center py-16">
+      <p class="font-body text-lg italic text-secondary">Nachrichten werden geladen...</p>
+    </div>
+  </div>
+
+  <!-- Audio Player (sticky bottom) -->
+  <div id="audio-player" class="fixed bottom-0 left-0 right-0 bg-player text-player-text hidden" style="padding-bottom: env(safe-area-inset-bottom)">
+    <div class="max-w-lg mx-auto px-6 py-3">
+      <div class="flex items-center gap-4">
+        <button id="play-btn" class="w-12 h-12 rounded-full bg-accent flex items-center justify-center flex-shrink-0 active:scale-[0.93] transition-transform" aria-label="Play/Pause">
+          <svg id="play-icon" width="20" height="20" viewBox="0 0 20 20" fill="white">
+            <polygon points="6,3 17,10 6,17"/>
+          </svg>
+          <svg id="pause-icon" width="20" height="20" viewBox="0 0 20 20" fill="white" class="hidden">
+            <rect x="4" y="3" width="4" height="14"/>
+            <rect x="12" y="3" width="4" height="14"/>
+          </svg>
+        </button>
+
+        <div class="flex-1 min-w-0">
+          <div id="progress-bar" class="w-full h-1 bg-white/20 rounded-full cursor-pointer relative">
+            <div id="progress-fill" class="h-full bg-accent rounded-full transition-[width] duration-200" style="width: 0%"></div>
+          </div>
+          <div class="flex justify-between mt-1">
+            <span id="current-time" class="font-ui text-xs tabular-nums">0:00</span>
+            <span id="total-time" class="font-ui text-xs tabular-nums">0:00</span>
+          </div>
+        </div>
+
+        <div id="speed-selector" class="flex gap-1 flex-shrink-0">
+          <button data-speed="0.75" class="speed-btn">0.75×</button>
+          <button data-speed="1" class="speed-btn active">1×</button>
+          <button data-speed="1.25" class="speed-btn">1.25×</button>
+          <button data-speed="1.5" class="speed-btn">1.5×</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

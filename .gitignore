@@ -22,5 +22,8 @@ output/
 # Tailwind build output
 frontend/styles.css
 
+# Node
+node_modules/
+
 # Site build
 _site/
