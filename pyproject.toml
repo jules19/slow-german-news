@@ -1,0 +1,20 @@
+[project]
+name = "langsame-nachrichten"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "feedparser>=6.0",
+    "openai>=1.0",
+    "httpx>=0.27",
+    "mutagen>=1.47",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.9",
+]
+
+[project.scripts]
+build-news = "backend.build:main"
