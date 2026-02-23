@@ -6,12 +6,42 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from backend.audio import (
+    chunk_text,
     generate_audio_for_story,
     generate_single_audio,
     get_mp3_duration,
     reencode_mp3,
 )
 from backend.models import LevelContent, ProcessedStory
+
+
+class TestChunkText:
+    def test_short_text_single_chunk(self):
+        result = chunk_text("Hallo Welt.", max_chars=100)
+        assert result == ["Hallo Welt."]
+
+    def test_splits_at_sentence_boundaries(self):
+        text = "Satz eins. Satz zwei. Satz drei."
+        result = chunk_text(text, max_chars=25)
+        assert len(result) == 2
+        assert result[0] == "Satz eins. Satz zwei."
+        assert result[1] == "Satz drei."
+
+    def test_handles_long_text(self):
+        # 5000 chars should be split into 2 chunks at default limit
+        sentences = ["Dies ist ein Testsatz." for _ in range(300)]
+        text = " ".join(sentences)
+        assert len(text) > 4096
+        result = chunk_text(text)
+        assert len(result) >= 2
+        for c in result:
+            assert len(c) <= 4096
+
+    def test_preserves_all_text(self):
+        text = "Erster Satz. Zweiter Satz. Dritter Satz."
+        result = chunk_text(text, max_chars=20)
+        rejoined = " ".join(result)
+        assert rejoined == text
 
 
 class TestReencodeMp3:
