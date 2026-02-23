@@ -1,0 +1,63 @@
+name: Build and Deploy Langsame Nachrichten
+
+on:
+  schedule:
+    - cron: '23 19 * * *'  # 19:23 UTC ≈ 6:23 AM AEDT
+  workflow_dispatch:        # Manual trigger for testing
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: pip install -e .
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Build today's content
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python -m backend.build
+
+      - name: Build Tailwind CSS
+        run: npx @tailwindcss/cli -i frontend/input.css -o frontend/styles.css --minify
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r frontend/* _site/
+          rm -f _site/input.css
+          cp -r output/content _site/content
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: '_site'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
