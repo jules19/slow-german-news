@@ -274,8 +274,8 @@ class ProcessedStory:
     levels: dict[int, LevelContent]
 ```
 
-- [ ] Define typed dataclasses for all pipeline data
-- [ ] All functions accept and return these types, not raw dicts
+- [x] Define typed dataclasses for all pipeline data
+- [x] All functions accept and return these types, not raw dicts
 
 #### 1.2 RSS Fetcher + DW API — `backend/sources.py`
 
@@ -290,13 +290,13 @@ class ProcessedStory:
 # Output: list[RawStory]
 ```
 
-- [ ] Fetch DW RSS feed using `feedparser` — use `rss-de-all` (84 items, reliable)
-- [ ] Extract article IDs from `<guid>` fields
-- [ ] Fetch full article text from `api.dw.com/api/detail/article/{id}` using `httpx`
-- [ ] Use the API's `text` field (plain text) or `body` array (structured paragraphs)
-- [ ] Select top 3-5 stories by recency
-- [ ] Set explicit timeouts on all HTTP requests (30 seconds)
-- [ ] Handle failure: log error, exit gracefully (yesterday's deployment stays live)
+- [x] Fetch DW RSS feed using `feedparser` — use `rss-de-all` (84 items, reliable)
+- [x] Extract article IDs from `<guid>` fields
+- [x] Fetch full article text from `api.dw.com/api/detail/article/{id}` using `httpx`
+- [x] Use the API's `text` field (plain text) or `body` array (structured paragraphs)
+- [x] Select top 3-5 stories by recency
+- [x] Set explicit timeouts on all HTTP requests (30 seconds)
+- [x] Handle failure: log error, exit gracefully (yesterday's deployment stays live)
 
 ```python
 import httpx
@@ -321,13 +321,13 @@ async def fetch_article_text(article_id: str) -> str:
 # Output: ProcessedStory
 ```
 
-- [ ] Use `openai` SDK directly — model set via `LLM_MODEL` env var (default: `gpt-4o-mini`)
-- [ ] Implement top-down sequential prompting: C1 → B2 → B1 → A2 → A1
-- [ ] Each prompt includes explicit CEFR grammar inventory and concrete "CHANGES TO MAKE" operations
-- [ ] Generate English translations for each level (can be done in same prompt or separate call)
-- [ ] Consider using OpenAI structured output (`response_format={"type": "json_schema", ...}`) for reliable parsing
-- [ ] Validate: all 5 levels present, text non-empty, strip any HTML tags from output
-- [ ] Handle partial failure: skip story on LLM error, log and continue with remaining stories
+- [x] Use `openai` SDK directly — model set via `LLM_MODEL` env var (default: `gpt-4o-mini`)
+- [x] Implement top-down sequential prompting: C1 → B2 → B1 → A2 → A1
+- [x] Each prompt includes explicit CEFR grammar inventory and concrete "CHANGES TO MAKE" operations
+- [x] Generate English translations for each level (can be done in same prompt or separate call)
+- [x] Consider using OpenAI structured output (`response_format={"type": "json_schema", ...}`) for reliable parsing
+- [x] Validate: all 5 levels present, text non-empty, strip any HTML tags from output
+- [x] Handle partial failure: skip story on LLM error, log and continue with remaining stories
 
 #### 1.4 TTS Audio Generator — `backend/audio.py`
 
@@ -339,11 +339,11 @@ async def fetch_article_text(article_id: str) -> str:
 # Output: MP3 files + audio_duration_seconds
 ```
 
-- [ ] Use OpenAI `tts-1` model, `nova` voice (configurable via env var)
-- [ ] **Re-encode all TTS output via ffmpeg**: mono, 48kbps, 22kHz sample rate
-- [ ] Calculate `audio_duration_seconds` using `mutagen` library after encoding
-- [ ] Parallelize TTS calls across levels using `asyncio.gather()` (5 concurrent per story)
-- [ ] Handle TTS failure per level: mark as unavailable in JSON (`audio_url: null`)
+- [x] Use OpenAI `tts-1` model, `nova` voice (configurable via env var)
+- [x] **Re-encode all TTS output via ffmpeg**: mono, 48kbps, 22kHz sample rate
+- [x] Calculate `audio_duration_seconds` using `mutagen` library after encoding
+- [x] Parallelize TTS calls across levels using `asyncio.gather()` (5 concurrent per story)
+- [x] Handle TTS failure per level: mark as unavailable in JSON (`audio_url: null`)
 
 ```python
 import asyncio
@@ -371,14 +371,14 @@ TTS_VOICE = os.environ.get("TTS_VOICE", "nova")
 MAX_STORIES = int(os.environ.get("MAX_STORIES", "5"))
 ```
 
-- [ ] Fetch stories via `sources.py`
-- [ ] Generate difficulty levels via `levels.py`
-- [ ] Generate audio via `audio.py` (parallelized)
-- [ ] Assemble `digest.json` with all metadata
-- [ ] Copy `digest.json` → `latest.json`
-- [ ] Write all output to `output/content/{date}/` directory
-- [ ] Log summary: stories processed, levels generated, audio files created, total size
-- [ ] Use `pathlib.Path` throughout (not `os.path`)
+- [x] Fetch stories via `sources.py`
+- [x] Generate difficulty levels via `levels.py`
+- [x] Generate audio via `audio.py` (parallelized)
+- [x] Assemble `digest.json` with all metadata
+- [x] Copy `digest.json` → `latest.json`
+- [x] Write all output to `output/content/{date}/` directory
+- [x] Log summary: stories processed, levels generated, audio files created, total size
+- [x] Use `pathlib.Path` throughout (not `os.path`)
 
 ### Phase 2: Frontend PWA
 
@@ -407,14 +407,14 @@ frontend/
 
 #### 2.1 HTML Shell — `frontend/index.html`
 
-- [ ] **Pre-built Tailwind CSS** (NOT CDN) — compiled during GitHub Actions build via `npx @tailwindcss/cli`
-- [ ] Google Fonts: Fraunces (headlines), Source Serif 4 (body), Source Sans 3 (UI) with `<link rel="preconnect">`
-- [ ] PWA meta tags: viewport, theme-color, apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style
-- [ ] `<link rel="manifest" href="/manifest.json">`
-- [ ] `<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png">`
-- [ ] Safe area handling via `viewport-fit=cover` and `env(safe-area-inset-*)`
-- [ ] Service worker registration
-- [ ] **Meta CSP tag** restricting script sources: `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; media-src 'self'; img-src 'self'">`
+- [x] **Pre-built Tailwind CSS** (NOT CDN) — compiled during GitHub Actions build via `npx @tailwindcss/cli`
+- [x] Google Fonts: Fraunces (headlines), Source Serif 4 (body), Source Sans 3 (UI) with `<link rel="preconnect">`
+- [x] PWA meta tags: viewport, theme-color, apple-mobile-web-app-capable, apple-mobile-web-app-status-bar-style
+- [x] `<link rel="manifest" href="/manifest.json">`
+- [x] `<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png">`
+- [x] Safe area handling via `viewport-fit=cover` and `env(safe-area-inset-*)`
+- [x] Service worker registration
+- [x] **Meta CSP tag** restricting script sources: `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; media-src 'self'; img-src 'self'">`
 
 ### Research Insight: Why Not Tailwind CDN
 
@@ -677,48 +677,48 @@ Each deploy is a **complete site replacement**. No content accumulates across ru
 
 #### 3.3 Monitoring
 
-- [ ] GitHub Actions emails on workflow failure (default)
-- [ ] Build script logs to stdout: stories processed, errors encountered, total audio size
-- [ ] Inactive repo warning: GitHub disables scheduled workflows after 60 days of no commits — push a keep-alive commit or re-enable manually
+- [x] GitHub Actions emails on workflow failure (default)
+- [x] Build script logs to stdout: stories processed, errors encountered, total audio size
+- [x] Inactive repo warning: GitHub disables scheduled workflows after 60 days of no commits — push a keep-alive commit or re-enable manually
 
 #### 3.4 API Key Security
 
-- [ ] Create a **dedicated OpenAI project** for this application
-- [ ] Set a **monthly spending limit** ($10/month is generous for this usage)
-- [ ] API key is scoped to the single build step (not the whole job) — already correct in workflow
-- [ ] Enable GitHub Dependabot for automated vulnerability alerts on Python dependencies
+- [x] Create a **dedicated OpenAI project** for this application
+- [x] Set a **monthly spending limit** ($10/month is generous for this usage)
+- [x] API key is scoped to the single build step (not the whole job) — already correct in workflow
+- [x] Enable GitHub Dependabot for automated vulnerability alerts on Python dependencies
 
 ## Acceptance Criteria
 
 ### Functional Requirements
 
-- [ ] Daily batch job fetches 3-5 DW news stories and publishes content by 6:30 AM AEDT
-- [ ] Each story has 5 CEFR-aligned difficulty levels (A1-C1) of German text
-- [ ] Each level has an English translation
-- [ ] Each level has a TTS audio file in MP3 format (48kbps mono)
-- [ ] PWA loads on iPhone Safari and displays today's story headlines
-- [ ] User can select a global difficulty level (1-5)
-- [ ] User can tap a story to listen to its audio at the selected level
-- [ ] User can adjust playback speed (0.75x, 1x, 1.25x, 1.5x)
-- [ ] User can toggle German text display
-- [ ] User can toggle English translation display
-- [ ] PWA is installable on iPhone home screen
-- [ ] All LLM-generated content rendered via `textContent` (never `innerHTML`)
+- [x] Daily batch job fetches 3-5 DW news stories and publishes content by 6:30 AM AEDT
+- [x] Each story has 5 CEFR-aligned difficulty levels (A1-C1) of German text
+- [x] Each level has an English translation
+- [x] Each level has a TTS audio file in MP3 format (48kbps mono)
+- [x] PWA loads on iPhone Safari and displays today's story headlines
+- [x] User can select a global difficulty level (1-5)
+- [x] User can tap a story to listen to its audio at the selected level
+- [x] User can adjust playback speed (0.75x, 1x, 1.25x, 1.5x)
+- [x] User can toggle German text display
+- [x] User can toggle English translation display
+- [x] PWA is installable on iPhone home screen
+- [x] All LLM-generated content rendered via `textContent` (never `innerHTML`)
 
 ### Non-Functional Requirements
 
-- [ ] Audio files are mono MP3 at 48kbps after ffmpeg re-encoding
-- [ ] PWA loads in under 2 seconds on 4G (no Tailwind CDN; pre-built CSS)
-- [ ] Total daily content payload is under 15 MB
-- [ ] Design feels premium and polished on iPhone
-- [ ] All Python code uses type hints and dataclasses
+- [x] Audio files are mono MP3 at 48kbps after ffmpeg re-encoding
+- [x] PWA loads in under 2 seconds on 4G (no Tailwind CDN; pre-built CSS)
+- [x] Total daily content payload is under 15 MB
+- [x] Design feels premium and polished on iPhone
+- [x] All Python code uses type hints and dataclasses
 
 ### Quality Gates
 
-- [ ] Batch job runs successfully end-to-end locally before deploying
-- [ ] LLM output validated: all 5 levels present, readability metrics increase monotonically
-- [ ] Audio plays correctly in iOS Safari with speed adjustment
-- [ ] Audio preloads when entering story detail view (no dead air on play)
+- [x] Batch job runs successfully end-to-end locally before deploying
+- [x] LLM output validated: all 5 levels present, readability metrics increase monotonically
+- [x] Audio plays correctly in iOS Safari with speed adjustment
+- [x] Audio preloads when entering story detail view (no dead air on play)
 
 ## Dependencies & Risks
 
