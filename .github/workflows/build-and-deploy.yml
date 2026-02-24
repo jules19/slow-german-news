@@ -37,7 +37,9 @@ jobs:
         run: python -m backend.build
 
       - name: Build Tailwind CSS
-        run: npx @tailwindcss/cli -i frontend/input.css -o frontend/styles.css --minify
+        run: |
+          npm install tailwindcss @tailwindcss/cli
+          npx @tailwindcss/cli -i frontend/input.css -o frontend/styles.css --minify
 
       - name: Assemble site
         run: |
