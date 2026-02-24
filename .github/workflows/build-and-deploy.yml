@@ -1,8 +1,8 @@
 name: Build and Deploy Langsame Nachrichten
 
 on:
-  schedule:
-    - cron: '23 19 * * *'  # 19:23 UTC ≈ 6:23 AM AEDT
+  # schedule:
+  #   - cron: '23 19 * * *'  # 19:23 UTC ≈ 6:23 AM AEDT
   workflow_dispatch:        # Manual trigger for testing
 
 concurrency:
