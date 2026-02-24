@@ -31,41 +31,40 @@ def _call_llm(client: OpenAI, model: str, prompt: str) -> dict:
 def generate_levels(
     story: RawStory, client: OpenAI, model: str
 ) -> ProcessedStory:
-    """Generate 5 CEFR-aligned difficulty levels for a story.
+    """Generate 3 CEFR-aligned difficulty levels for a story.
 
-    Generation order: top-down sequential (C1 → B2 → B1 → A2 → A1).
-    Each level simplifies from the one above.
+    Generation order: top-down sequential (C1 → B1 → A1).
+    Levels are numbered 1 (A1), 2 (B1), 3 (C1).
     """
     levels: dict[int, LevelContent] = {}
     headline_de = ""
     headline_en = ""
     summary_en = ""
 
-    # Level 5 (C1) — start from original article
-    prompt_5 = LEVEL_PROMPTS[5].format(article_text=story.full_text)
-    result_5 = _call_llm(client, model, prompt_5)
+    # Level 3 (C1) — start from original article
+    prompt_c1 = LEVEL_PROMPTS[3].format(article_text=story.full_text)
+    result_c1 = _call_llm(client, model, prompt_c1)
 
-    headline_de = result_5.get("headline_de", story.title)
-    headline_en = result_5.get("headline_en", "")
-    summary_en = result_5.get("summary_en", "")
-    text_de_5 = result_5["text_de"]
+    headline_de = result_c1.get("headline_de", story.title)
+    headline_en = result_c1.get("headline_en", "")
+    summary_en = result_c1.get("summary_en", "")
+    text_de_c1 = result_c1["text_de"]
 
-    # Translate level 5
-    trans_prompt = TRANSLATION_PROMPT.format(text_de=text_de_5)
+    # Translate C1
+    trans_prompt = TRANSLATION_PROMPT.format(text_de=text_de_c1)
     trans_result = _call_llm(client, model, trans_prompt)
-    text_en_5 = trans_result["text_en"]
+    text_en_c1 = trans_result["text_en"]
 
-    levels[5] = LevelContent(text_de=text_de_5, text_en=text_en_5)
-    logger.info("Story %s: Level 5 (C1) generated", story.id)
+    levels[3] = LevelContent(text_de=text_de_c1, text_en=text_en_c1)
+    logger.info("Story %s: Level 3 (C1) generated", story.id)
 
-    # Levels 4 → 1, each simplifying from the previous
-    previous_text = text_de_5
-    for level_num in [4, 3, 2, 1]:
+    # Level 2 (B1) — simplify from C1
+    previous_text = text_de_c1
+    for level_num in [2, 1]:
         prompt = LEVEL_PROMPTS[level_num].format(previous_text=previous_text)
         result = _call_llm(client, model, prompt)
         text_de = result["text_de"]
 
-        # Translate this level
         trans_prompt = TRANSLATION_PROMPT.format(text_de=text_de)
         trans_result = _call_llm(client, model, trans_prompt)
         text_en = trans_result["text_en"]

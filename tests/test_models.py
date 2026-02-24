@@ -60,7 +60,7 @@ class TestProcessedStory:
     def test_construction(self):
         levels = {
             1: LevelContent(text_de="Einfach", text_en="Simple"),
-            5: LevelContent(text_de="Komplex", text_en="Complex"),
+            3: LevelContent(text_de="Komplex", text_en="Complex"),
         }
         story = ProcessedStory(
             id="12345",
@@ -74,12 +74,12 @@ class TestProcessedStory:
         assert story.headline_de == "Test Schlagzeile"
         assert len(story.levels) == 2
         assert story.levels[1].text_de == "Einfach"
-        assert story.levels[5].text_en == "Complex"
+        assert story.levels[3].text_en == "Complex"
 
-    def test_all_five_levels(self):
+    def test_all_three_levels(self):
         levels = {
             i: LevelContent(text_de=f"Level {i} DE", text_en=f"Level {i} EN")
-            for i in range(1, 6)
+            for i in range(1, 4)
         }
         story = ProcessedStory(
             id="99999",
@@ -89,6 +89,6 @@ class TestProcessedStory:
             source_url="https://dw.com/a-99999",
             levels=levels,
         )
-        assert len(story.levels) == 5
-        for i in range(1, 6):
+        assert len(story.levels) == 3
+        for i in range(1, 4):
             assert i in story.levels

@@ -38,7 +38,7 @@ def get_config() -> dict:
         "api_key": api_key,
         "llm_model": os.environ.get("LLM_MODEL", "gpt-4o-mini"),
         "tts_voice": os.environ.get("TTS_VOICE", "nova"),
-        "max_stories": int(os.environ.get("MAX_STORIES", "5")),
+        "max_stories": int(os.environ.get("MAX_STORIES", "3")),
     }
 
 

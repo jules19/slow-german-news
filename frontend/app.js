@@ -13,7 +13,7 @@
   // --- Preferences (localStorage) ---
   function getLevel() {
     const val = parseInt(localStorage.getItem("difficulty"), 10);
-    return Math.max(1, Math.min(5, isNaN(val) ? 2 : val));
+    return Math.max(1, Math.min(3, isNaN(val) ? 1 : val));
   }
   function setLevel(level) {
     localStorage.setItem("difficulty", String(level));

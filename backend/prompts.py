@@ -1,7 +1,7 @@
 """CEFR-aligned prompt templates for progressive difficulty generation.
 
-Generation order: top-down sequential (C1 → B2 → B1 → A2 → A1).
-Each level specifies what to keep and what to simplify from the level above.
+Generation order: top-down sequential (C1 → B1 → A1).
+3 levels: 1 (A1 Einfach), 2 (B1 Mittel), 3 (C1 Original).
 """
 
 SYSTEM_PROMPT = """\
@@ -60,10 +60,10 @@ Respond with JSON:
 }}"""
 
 LEVEL_3_B1_PROMPT = """\
-Simplify this German text from B2 to B1 level. This is the middle ground — \
+Simplify this German text from C1 to B1 level. This is the middle ground — \
 clear news language without advanced grammar.
 
-CURRENT TEXT (B2):
+CURRENT TEXT (C1):
 {previous_text}
 
 CHANGES TO MAKE:
@@ -110,10 +110,10 @@ Respond with JSON:
 }}"""
 
 LEVEL_1_A1_PROMPT = """\
-Simplify this German text from A2 to A1 level. Use only the most basic \
+Simplify this German text from B1 to A1 level. Use only the most basic \
 German. This should be understandable by a true beginner.
 
-CURRENT TEXT (A2):
+CURRENT TEXT (B1):
 {previous_text}
 
 CHANGES TO MAKE:
@@ -145,11 +145,9 @@ Respond with JSON:
   "text_en": "The English translation"
 }}"""
 
-# Map level numbers to their prompts (5 = C1 first, down to 1 = A1)
+# Map level numbers to their prompts (3 = C1 first, down to 1 = A1)
 LEVEL_PROMPTS = {
-    5: LEVEL_5_C1_PROMPT,
-    4: LEVEL_4_B2_PROMPT,
-    3: LEVEL_3_B1_PROMPT,
-    2: LEVEL_2_A2_PROMPT,
+    3: LEVEL_5_C1_PROMPT,
+    2: LEVEL_3_B1_PROMPT,
     1: LEVEL_1_A1_PROMPT,
 }

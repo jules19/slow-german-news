@@ -29,10 +29,10 @@ SAMPLE_STORY = ProcessedStory(
             audio_url="content/2026-02-23/12345/level-1.mp3",
             audio_duration_seconds=10.5,
         ),
-        5: LevelContent(
+        3: LevelContent(
             text_de="Komplex.",
             text_en="Complex.",
-            audio_url="content/2026-02-23/12345/level-5.mp3",
+            audio_url="content/2026-02-23/12345/level-3.mp3",
             audio_duration_seconds=25.0,
         ),
     },
@@ -61,7 +61,7 @@ class TestGetConfig:
         config = get_config()
         assert config["llm_model"] == "gpt-4o-mini"
         assert config["tts_voice"] == "nova"
-        assert config["max_stories"] == 5
+        assert config["max_stories"] == 3
 
     def test_missing_api_key_raises(self, monkeypatch):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
@@ -75,7 +75,7 @@ class TestStoryToDict:
         assert result["id"] == "12345"
         assert result["headline_de"] == "Test Schlagzeile"
         assert "1" in result["levels"]
-        assert "5" in result["levels"]
+        assert "3" in result["levels"]
         assert result["levels"]["1"]["text_de"] == "Einfach."
         assert result["levels"]["1"]["audio_url"] == "content/2026-02-23/12345/level-1.mp3"
         assert result["levels"]["1"]["audio_duration_seconds"] == 10.5
@@ -156,12 +156,12 @@ class TestRunPipeline:
                 "api_key": "test-key",
                 "llm_model": "gpt-4o-mini",
                 "tts_voice": "nova",
-                "max_stories": 5,
+                "max_stories": 3,
             }
 
             await run_pipeline(config)
 
-            mock_fetch.assert_called_once_with(max_stories=5)
+            mock_fetch.assert_called_once_with(max_stories=3)
             mock_levels.assert_called_once()
             mock_audio.assert_called_once()
             mock_write.assert_called_once()
