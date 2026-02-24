@@ -111,7 +111,9 @@ Respond with JSON:
 
 LEVEL_1_A1_PROMPT = """\
 Simplify this German text from B1 to A1 level. Use only the most basic \
-German. This should be understandable by a true beginner.
+German. This should be understandable by a true beginner. Cover ALL the \
+main points of the story — do not shorten or summarize. Use more sentences \
+with simpler words to explain the same content.
 
 CURRENT TEXT (B1):
 {previous_text}
@@ -122,8 +124,8 @@ CHANGES TO MAKE:
 - Remove all subordinate clauses (no weil, dass, wenn)
 - Only und, oder, aber for connecting ideas
 - Use only the most basic vocabulary (top 500 words)
-- Write 2-3 short sentences total
 - Maximum ~8 words per sentence
+- IMPORTANT: Cover the full story. Use many short sentences, not fewer sentences.
 
 ALLOWED GRAMMAR: Present tense only, SVO main clauses only, und/oder/aber, \
 basic vocabulary, no subordination.
