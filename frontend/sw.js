@@ -1,5 +1,5 @@
 const CACHE = "shell-v1";
-const SHELL = ["/", "/index.html", "/app.js", "/styles.css", "/manifest.json"];
+const SHELL = ["./", "./index.html", "./app.js", "./styles.css", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));

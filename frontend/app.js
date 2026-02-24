@@ -77,7 +77,7 @@
   // --- Fetch Data ---
   async function fetchDigest() {
     try {
-      const resp = await fetch("/content/latest.json");
+      const resp = await fetch("./content/latest.json");
       if (!resp.ok) throw new Error("Fetch failed: " + resp.status);
       digest = await resp.json();
       loadingState.classList.add("hidden");
@@ -162,7 +162,7 @@
     // Load audio
     audio.pause();
     if (levelData && levelData.audio_url) {
-      audio.src = "/" + levelData.audio_url;
+      audio.src = "./" + levelData.audio_url;
       audio.preload = "auto";
       audio.playbackRate = getSpeed();
       updatePlayButton(false);
