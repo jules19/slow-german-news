@@ -16,5 +16,8 @@ dev = [
     "ruff>=0.9",
 ]
 
+[tool.setuptools.packages.find]
+include = ["backend*"]
+
 [project.scripts]
 build-news = "backend.build:main"

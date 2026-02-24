@@ -205,7 +205,7 @@
   $("#play-btn").addEventListener("click", () => {
     if (!audio.src) return;
     if (audio.paused) {
-      audio.play();
+      audio.play().catch((err) => console.error("Audio play failed:", err));
     } else {
       audio.pause();
     }
