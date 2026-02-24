@@ -202,6 +202,11 @@
     $("#pause-icon").classList.toggle("hidden", !isPlaying);
   }
 
+  $("#rewind-btn").addEventListener("click", () => {
+    if (!audio.src) return;
+    audio.currentTime = Math.max(0, audio.currentTime - 10);
+  });
+
   $("#play-btn").addEventListener("click", () => {
     if (!audio.src) return;
     if (audio.paused) {
