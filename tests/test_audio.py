@@ -10,6 +10,7 @@ from backend.audio import (
     generate_audio_for_story,
     generate_single_audio,
     get_mp3_duration,
+    normalize_for_speech,
     reencode_mp3,
 )
 from backend.models import LevelContent, ProcessedStory
@@ -42,6 +43,32 @@ class TestChunkText:
         result = chunk_text(text, max_chars=20)
         rejoined = " ".join(result)
         assert rejoined == text
+
+
+class TestNormalizeForSpeech:
+    def test_converts_year(self):
+        assert "zweitausendvierundvierzig" in normalize_for_speech("bis 2044 soll")
+
+    def test_converts_year_2026(self):
+        result = normalize_for_speech("Im Jahr 2026 passiert viel.")
+        assert "zweitausendsechsundzwanzig" in result
+
+    def test_converts_year_1990(self):
+        result = normalize_for_speech("Seit 1990 ist Deutschland vereint.")
+        assert "eintausendneunhundertneunzig" in result
+
+    def test_preserves_non_year_numbers(self):
+        # 500 is not a year (not 4 digits)
+        assert normalize_for_speech("Es gibt 500 Arten.") == "Es gibt 500 Arten."
+
+    def test_preserves_text_without_numbers(self):
+        text = "Hallo Welt, wie geht es?"
+        assert normalize_for_speech(text) == text
+
+    def test_converts_multiple_years(self):
+        result = normalize_for_speech("Von 2020 bis 2030.")
+        assert "zweitausendzwanzig" in result
+        assert "zweitausenddreißig" in result
 
 
 class TestReencodeMp3:

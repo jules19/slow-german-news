@@ -43,23 +43,27 @@ class TestGetConfig:
     def test_reads_env_vars(self, monkeypatch):
         monkeypatch.setenv("OPENAI_API_KEY", "test-key")
         monkeypatch.setenv("LLM_MODEL", "gpt-4o")
+        monkeypatch.setenv("TTS_BACKEND", "qwen")
         monkeypatch.setenv("TTS_VOICE", "echo")
         monkeypatch.setenv("MAX_STORIES", "3")
 
         config = get_config()
         assert config["api_key"] == "test-key"
         assert config["llm_model"] == "gpt-4o"
+        assert config["tts_backend"] == "qwen"
         assert config["tts_voice"] == "echo"
         assert config["max_stories"] == 3
 
     def test_defaults(self, monkeypatch):
         monkeypatch.setenv("OPENAI_API_KEY", "test-key")
         monkeypatch.delenv("LLM_MODEL", raising=False)
+        monkeypatch.delenv("TTS_BACKEND", raising=False)
         monkeypatch.delenv("TTS_VOICE", raising=False)
         monkeypatch.delenv("MAX_STORIES", raising=False)
 
         config = get_config()
         assert config["llm_model"] == "gpt-4o-mini"
+        assert config["tts_backend"] == "openai"
         assert config["tts_voice"] == "nova"
         assert config["max_stories"] == 3
 
@@ -155,6 +159,7 @@ class TestRunPipeline:
             config = {
                 "api_key": "test-key",
                 "llm_model": "gpt-4o-mini",
+                "tts_backend": "openai",
                 "tts_voice": "nova",
                 "max_stories": 3,
             }
