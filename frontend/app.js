@@ -7,6 +7,8 @@
   // --- State ---
   let digest = null;
   let currentStoryIndex = null;
+  let archiveDates = [];
+  let currentDate = null;
   const audio = new Audio();
   audio.preservesPitch = true;
 
@@ -77,13 +79,91 @@
   // --- Fetch Data ---
   async function fetchDigest() {
     try {
-      const resp = await fetch("./content/latest.json");
-      if (!resp.ok) throw new Error("Fetch failed: " + resp.status);
-      digest = await resp.json();
-      loadingState.classList.add("hidden");
-      renderStoryList();
+      // Try archive.json first (local cron deploy), fall back to latest.json (CI deploy)
+      try {
+        const archiveResp = await fetch("./content/archive.json");
+        if (archiveResp.ok) {
+          const archiveData = await archiveResp.json();
+          if (archiveData.dates && archiveData.dates.length > 0) {
+            archiveDates = archiveData.dates;
+          }
+        }
+      } catch (e) {
+        // archive.json not available — fall back to latest.json
+      }
+
+      if (archiveDates.length > 0) {
+        renderDateTabs(archiveDates);
+        await loadDate(archiveDates[0]);
+      } else {
+        const resp = await fetch("./content/latest.json");
+        if (!resp.ok) throw new Error("Fetch failed: " + resp.status);
+        digest = await resp.json();
+        loadingState.classList.add("hidden");
+        renderStoryList();
+      }
     } catch (err) {
       console.error("Failed to fetch digest:", err);
+      loadingState.classList.add("hidden");
+      errorState.classList.remove("hidden");
+    }
+  }
+
+  // --- Date Tabs ---
+  const SHORT_MONTHS_DE = [
+    "Jan", "Feb", "Mär", "Apr", "Mai", "Jun",
+    "Jul", "Aug", "Sep", "Okt", "Nov", "Dez",
+  ];
+
+  function getDateLabel(dateStr, today, yesterday) {
+    const d = new Date(dateStr + "T00:00:00");
+    if (d.getTime() === today.getTime()) return "Heute";
+    if (d.getTime() === yesterday.getTime()) return "Gestern";
+    return d.getDate() + ". " + SHORT_MONTHS_DE[d.getMonth()];
+  }
+
+  function renderDateTabs(dates) {
+    const dateTabs = $("#date-tabs");
+    dateTabs.innerHTML = "";
+    if (dates.length <= 1) {
+      dateTabs.classList.add("hidden");
+      return;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    dateTabs.classList.remove("hidden");
+    dates.forEach(function (dateStr) {
+      const btn = document.createElement("button");
+      btn.className = "level-pill";
+      btn.dataset.date = dateStr;
+      btn.textContent = getDateLabel(dateStr, today, yesterday);
+      btn.addEventListener("click", function () {
+        loadDate(dateStr);
+      });
+      dateTabs.appendChild(btn);
+    });
+  }
+
+  function updateDateTabsUI() {
+    $$("#date-tabs .level-pill").forEach(function (btn) {
+      btn.classList.toggle("active", btn.dataset.date === currentDate);
+    });
+  }
+
+  async function loadDate(dateStr) {
+    try {
+      const resp = await fetch("./content/" + dateStr + "/digest.json");
+      if (!resp.ok) throw new Error("Fetch failed: " + resp.status);
+      digest = await resp.json();
+      currentDate = dateStr;
+      loadingState.classList.add("hidden");
+      updateDateTabsUI();
+      renderStoryList();
+    } catch (err) {
+      console.error("Failed to load date " + dateStr + ":", err);
       loadingState.classList.add("hidden");
       errorState.classList.remove("hidden");
     }
@@ -100,8 +180,8 @@
 
     $("#date-display").textContent = formatDateDE(digest.date);
 
+    const level = getLevel();
     digest.stories.forEach((story, index) => {
-      const level = getLevel();
       const levelData = story.levels[String(level)];
       const duration = levelData && levelData.audio_duration_seconds
         ? Math.ceil(levelData.audio_duration_seconds / 60) + " Min."
@@ -151,8 +231,6 @@
     const level = getLevel();
     const levelData = story.levels[String(level)];
 
-    // Headline
-    const headlineDe = levelData ? levelData.text_de : story.headline_de;
     $("#detail-headline").textContent = story.headline_de;
 
     // Text content
@@ -269,7 +347,7 @@
 
   // --- Service Worker Registration ---
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
+    navigator.serviceWorker.register("./sw.js").catch((err) => {
       console.warn("SW registration failed:", err);
     });
   }
