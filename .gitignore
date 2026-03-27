@@ -27,3 +27,9 @@ node_modules/
 
 # Site build
 _site/
+.ghpages-worktree/
+
+# Build logs
+build.log
+build-stdout.log
+build-stderr.log

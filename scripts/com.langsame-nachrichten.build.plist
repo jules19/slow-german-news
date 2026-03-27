@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.langsame-nachrichten.build</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/julian/Programming/slow-german-news/scripts/build-and-deploy.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/julian/Programming/slow-german-news</string>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>6</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin</string>
+        <key>TTS_BACKEND</key>
+        <string>qwen</string>
+        <!-- Set OPENAI_API_KEY in the plist or via launchd environment -->
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/julian/Programming/slow-german-news/build-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/julian/Programming/slow-german-news/build-stderr.log</string>
+</dict>
+</plist>
