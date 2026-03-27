@@ -19,6 +19,12 @@ output/
 # Environment
 .env
 
+# Qwen TTS test artifacts
+.venv-qwen-tts/
+german_tts_*.wav
+/ref_german_nova.wav
+.playwright-mcp/
+
 # Tailwind build output
 frontend/styles.css
 

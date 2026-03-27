@@ -15,6 +15,9 @@ dev = [
     "pytest-asyncio>=0.24",
     "ruff>=0.9",
 ]
+local-tts = [
+    "mlx-audio",
+]
 
 [tool.setuptools.packages.find]
 include = ["backend*"]

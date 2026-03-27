@@ -34,6 +34,7 @@ jobs:
       - name: Build today's content
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TTS_BACKEND: openai
         run: python -m backend.build
 
       - name: Build Tailwind CSS

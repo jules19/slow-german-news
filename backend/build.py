@@ -6,7 +6,8 @@ Usage:
 Environment variables:
     OPENAI_API_KEY  — required
     LLM_MODEL       — default: gpt-4o-mini
-    TTS_VOICE       — default: nova
+    TTS_BACKEND     — default: openai (options: openai, qwen)
+    TTS_VOICE       — default: nova (OpenAI voice; ignored when TTS_BACKEND=qwen)
     MAX_STORIES     — default: 5
 """
 
@@ -31,12 +32,14 @@ OUTPUT_DIR = Path("output")
 
 def get_config() -> dict:
     """Read configuration from environment variables."""
+    tts_backend = os.environ.get("TTS_BACKEND", "openai")
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("OPENAI_API_KEY environment variable is required")
     return {
         "api_key": api_key,
         "llm_model": os.environ.get("LLM_MODEL", "gpt-4o-mini"),
+        "tts_backend": tts_backend,
         "tts_voice": os.environ.get("TTS_VOICE", "nova"),
         "max_stories": int(os.environ.get("MAX_STORIES", "3")),
     }
@@ -116,13 +119,19 @@ async def run_pipeline(config: dict) -> None:
         raise RuntimeError("No stories processed successfully. Aborting.")
 
     # Step 3: Generate audio
-    tts_client = AsyncOpenAI(api_key=config["api_key"])
+    tts_backend = config["tts_backend"]
+    tts_client = None
+    if tts_backend == "openai":
+        tts_client = AsyncOpenAI(api_key=config["api_key"])
+    logger.info("Using TTS backend: %s", tts_backend)
+
     stories_with_audio: list[ProcessedStory] = []
     for story in processed_stories:
         try:
             logger.info("Generating audio for story %s", story.id)
             with_audio = await generate_audio_for_story(
                 story, tts_client, config["tts_voice"], content_dir,
+                tts_backend=tts_backend,
             )
             stories_with_audio.append(with_audio)
         except Exception:
