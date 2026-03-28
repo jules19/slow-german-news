@@ -18,9 +18,11 @@ TTS_MAX_CHARS = 4096
 # Qwen3-TTS reference audio for voice cloning
 REF_AUDIO_PATH = Path(__file__).parent / "assets" / "ref_german_nova.wav"
 REF_TEXT = (
-    "Die Regierung in Mexiko hat viele Jahre mit Drogenkartellen gesprochen. "
-    "Jetzt ist El Mencho gestorben. Er war ein Drogenboss. "
-    "Er starb nach einem Schusswechsel mit der Polizei."
+    "Bundes-Regierung will mehr Geld für Wind-Räder und Lade-Säulen ausgeben. "
+    "Die Bundes-Regierung will mehr Geld für neue Wind-Räder und Lade-Säulen "
+    "für Elektro-Autos geben. Das steht in dem neuen Programm für den "
+    "Klima-Schutz. Der Bundes-Kanzler und die Minister haben das Programm "
+    "beschlossen."
 )
 
 # Lazily loaded Qwen model (module-level cache)
