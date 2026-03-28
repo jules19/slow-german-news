@@ -59,7 +59,7 @@ export TTS_BACKEND="${TTS_BACKEND:-openai}"
 export OPENAI_API_KEY
 
 # Check idempotency: skip only if digest AND audio files exist
-AUDIO_COUNT=$(find "$TODAY_CONTENT" -name '*.mp3' 2>/dev/null | wc -l | tr -d ' ')
+AUDIO_COUNT=$(find "$TODAY_CONTENT" -name '*.mp3' 2>/dev/null | wc -l | tr -d ' ' || echo 0)
 if [ -d "$TODAY_CONTENT" ] && [ -f "$TODAY_CONTENT/digest.json" ] && [ "$AUDIO_COUNT" -gt 0 ]; then
     log "Content for $TODAY already exists ($AUDIO_COUNT audio files) — skipping pipeline."
 else
@@ -68,7 +68,7 @@ else
     python -m backend.build || die "Pipeline failed"
 
     # Validate audio was generated
-    AUDIO_COUNT=$(find "$TODAY_CONTENT" -name '*.mp3' 2>/dev/null | wc -l | tr -d ' ')
+    AUDIO_COUNT=$(find "$TODAY_CONTENT" -name '*.mp3' 2>/dev/null | wc -l | tr -d ' ' || echo 0)
     if [ "$AUDIO_COUNT" -eq 0 ]; then
         die "Pipeline produced no audio files — refusing to deploy"
     fi
