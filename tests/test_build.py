@@ -154,7 +154,20 @@ class TestRunPipeline:
                 levels={1: LevelContent(text_de="Einfach", text_en="Simple")},
             )
             mock_levels.return_value = processed
-            mock_audio.return_value = processed
+
+            with_audio = ProcessedStory(
+                id="111",
+                headline_de="Schlagzeile",
+                headline_en="Headline",
+                summary_en="Summary",
+                source_url="https://dw.com/a-111",
+                levels={1: LevelContent(
+                    text_de="Einfach", text_en="Simple",
+                    audio_url="content/2026/111/level-1.mp3",
+                    audio_duration_seconds=10.5,
+                )},
+            )
+            mock_audio.return_value = with_audio
 
             config = {
                 "api_key": "test-key",

@@ -135,25 +135,34 @@ async def run_pipeline(config: dict) -> None:
             )
             stories_with_audio.append(with_audio)
         except Exception:
-            logger.exception("Failed to generate audio for story %s", story.id)
-            stories_with_audio.append(story)
+            logger.exception(
+                "Failed to generate audio for story %s — excluding from digest",
+                story.id,
+            )
+
+    # Filter out stories where no levels have audio
+    stories_with_audio = [
+        s for s in stories_with_audio
+        if any(c.audio_url for c in s.levels.values())
+    ]
+
+    total_audio = sum(
+        1 for s in stories_with_audio
+        for c in s.levels.values() if c.audio_url
+    )
+    total_levels = sum(len(s.levels) for s in stories_with_audio)
+    logger.info(
+        "Audio: %d/%d levels across %d stories",
+        total_audio, total_levels, len(stories_with_audio),
+    )
+
+    if not stories_with_audio:
+        raise RuntimeError("No stories have audio. Aborting.")
 
     # Step 4: Write output
     digest = build_digest(stories_with_audio, today)
     write_digest(digest, content_dir)
-
-    # Summary
-    total_audio = sum(
-        1
-        for s in stories_with_audio
-        for c in s.levels.values()
-        if c.audio_url
-    )
-    logger.info(
-        "Pipeline complete: %d stories, %d audio files",
-        len(stories_with_audio),
-        total_audio,
-    )
+    logger.info("Pipeline complete: %d stories written.", len(stories_with_audio))
 
 
 def main() -> None:

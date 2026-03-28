@@ -54,12 +54,25 @@ source "$VENV_PATH/bin/activate"
 TODAY=$(date +%Y-%m-%d)
 TODAY_CONTENT="output/content/$TODAY"
 
-if [ -d "$TODAY_CONTENT" ] && [ -f "$TODAY_CONTENT/digest.json" ]; then
-    log "Content for $TODAY already exists — skipping pipeline."
+# Ensure TTS_BACKEND is exported to Python subprocess
+export TTS_BACKEND="${TTS_BACKEND:-openai}"
+export OPENAI_API_KEY
+
+# Check idempotency: skip only if digest AND audio files exist
+AUDIO_COUNT=$(find "$TODAY_CONTENT" -name '*.mp3' 2>/dev/null | wc -l | tr -d ' ')
+if [ -d "$TODAY_CONTENT" ] && [ -f "$TODAY_CONTENT/digest.json" ] && [ "$AUDIO_COUNT" -gt 0 ]; then
+    log "Content for $TODAY already exists ($AUDIO_COUNT audio files) — skipping pipeline."
 else
-    log "Running content pipeline (TTS_BACKEND=${TTS_BACKEND:-openai})..."
+    [ -d "$TODAY_CONTENT" ] && log "Previous run had no audio — re-running pipeline."
+    log "Running content pipeline (TTS_BACKEND=$TTS_BACKEND)..."
     python -m backend.build || die "Pipeline failed"
-    log "Pipeline complete."
+
+    # Validate audio was generated
+    AUDIO_COUNT=$(find "$TODAY_CONTENT" -name '*.mp3' 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$AUDIO_COUNT" -eq 0 ]; then
+        die "Pipeline produced no audio files — refusing to deploy"
+    fi
+    log "Pipeline complete ($AUDIO_COUNT audio files)."
 fi
 
 # --- Step 2: Build Tailwind CSS ---
