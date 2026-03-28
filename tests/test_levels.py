@@ -50,19 +50,18 @@ class TestCallLlm:
 
 
 class TestGenerateLevels:
-    def test_generates_all_three_levels(self):
+    def test_generates_two_levels(self):
         client = MagicMock()
 
-        # Build response sequence: L3(C1), trans3, L2(B1), trans2, L1(A1), trans1
+        # Response sequence: C1 intermediate (not stored), L2(B1), trans2, L1(A1), trans1
         responses = [
-            # Level 3 (C1)
+            # C1 intermediate
             _make_mock_response({
                 "text_de": "Komplexer C1 Text.",
                 "headline_de": "C1 Schlagzeile",
                 "headline_en": "C1 Headline",
                 "summary_en": "A C1 summary.",
             }),
-            _make_mock_response({"text_en": "Complex C1 text."}),
             # Level 2 (B1)
             _make_mock_response({"text_de": "Mittlerer B1 Text."}),
             _make_mock_response({"text_en": "Medium B1 text."}),
@@ -80,21 +79,19 @@ class TestGenerateLevels:
         assert result.summary_en == "A C1 summary."
         assert result.source_url == "https://dw.com/a-12345"
 
-        # All 3 levels present
-        assert len(result.levels) == 3
-        for i in range(1, 4):
-            assert i in result.levels
-            assert result.levels[i].text_de
-            assert result.levels[i].text_en
+        # Only 2 levels (C1 not stored)
+        assert len(result.levels) == 2
+        assert 1 in result.levels
+        assert 2 in result.levels
+        assert 3 not in result.levels
 
-        # Verify specific content
-        assert result.levels[3].text_de == "Komplexer C1 Text."
-        assert result.levels[3].text_en == "Complex C1 text."
         assert result.levels[1].text_de == "Einfach A1."
         assert result.levels[1].text_en == "Simple A1."
+        assert result.levels[2].text_de == "Mittlerer B1 Text."
+        assert result.levels[2].text_en == "Medium B1 text."
 
-    def test_makes_six_llm_calls(self):
-        """3 levels + 3 translations = 6 LLM calls."""
+    def test_makes_five_llm_calls(self):
+        """C1 intermediate + 2 levels + 2 translations = 5 LLM calls."""
         client = MagicMock()
 
         responses = [
@@ -104,12 +101,12 @@ class TestGenerateLevels:
                 "headline_en": "H",
                 "summary_en": "S",
             }),
-        ] + [_make_mock_response({"text_de": "T", "text_en": "T"})] * 5
+        ] + [_make_mock_response({"text_de": "T", "text_en": "T"})] * 4
 
         client.chat.completions.create.side_effect = responses
 
         generate_levels(SAMPLE_STORY, client, "gpt-4o-mini")
-        assert client.chat.completions.create.call_count == 6
+        assert client.chat.completions.create.call_count == 5
 
     def test_sequential_simplification(self):
         """Each level prompt receives the text from the previous level."""
@@ -122,7 +119,6 @@ class TestGenerateLevels:
                 "headline_en": "H",
                 "summary_en": "S",
             }),
-            _make_mock_response({"text_en": "trans"}),
             _make_mock_response({"text_de": "B1_TEXT"}),
             _make_mock_response({"text_en": "trans"}),
             _make_mock_response({"text_de": "A1_TEXT"}),
@@ -134,14 +130,14 @@ class TestGenerateLevels:
 
         calls = client.chat.completions.create.call_args_list
 
-        # Call 0: L3 prompt should contain original article text
-        l3_prompt = calls[0].kwargs["messages"][1]["content"]
-        assert SAMPLE_STORY.full_text in l3_prompt
+        # Call 0: C1 prompt should contain original article text
+        c1_prompt = calls[0].kwargs["messages"][1]["content"]
+        assert SAMPLE_STORY.full_text in c1_prompt
 
-        # Call 2: L2 prompt should contain C1_TEXT
-        l2_prompt = calls[2].kwargs["messages"][1]["content"]
+        # Call 1: L2 prompt should contain C1_TEXT
+        l2_prompt = calls[1].kwargs["messages"][1]["content"]
         assert "C1_TEXT" in l2_prompt
 
-        # Call 4: L1 prompt should contain B1_TEXT
-        l1_prompt = calls[4].kwargs["messages"][1]["content"]
+        # Call 3: L1 prompt should contain B1_TEXT
+        l1_prompt = calls[3].kwargs["messages"][1]["content"]
         assert "B1_TEXT" in l1_prompt

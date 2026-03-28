@@ -51,9 +51,16 @@ fi
 source "$VENV_PATH/bin/activate"
 
 # --- Step 1: Run the content pipeline ---
-log "Running content pipeline (TTS_BACKEND=${TTS_BACKEND:-openai})..."
-python -m backend.build || die "Pipeline failed"
-log "Pipeline complete."
+TODAY=$(date +%Y-%m-%d)
+TODAY_CONTENT="output/content/$TODAY"
+
+if [ -d "$TODAY_CONTENT" ] && [ -f "$TODAY_CONTENT/digest.json" ]; then
+    log "Content for $TODAY already exists — skipping pipeline."
+else
+    log "Running content pipeline (TTS_BACKEND=${TTS_BACKEND:-openai})..."
+    python -m backend.build || die "Pipeline failed"
+    log "Pipeline complete."
+fi
 
 # --- Step 2: Build Tailwind CSS ---
 log "Building Tailwind CSS..."
@@ -72,10 +79,11 @@ fi
 # Ensure the gh-pages branch exists (create orphan if not)
 if ! git show-ref --verify --quiet refs/heads/gh-pages 2>/dev/null; then
     log "Creating orphan gh-pages branch..."
+    PREV_BRANCH=$(git branch --show-current)
     git checkout --orphan gh-pages
     git rm -rf . 2>/dev/null || true
     git commit --allow-empty -m "Initial gh-pages branch"
-    git checkout -
+    git checkout "$PREV_BRANCH"
 fi
 
 # Set up or update the worktree
@@ -98,8 +106,6 @@ for f in frontend/*; do
 done
 
 # Copy today's content
-TODAY=$(date +%Y-%m-%d)
-TODAY_CONTENT="output/content/$TODAY"
 if [ ! -d "$TODAY_CONTENT" ]; then
     die "No content generated for today ($TODAY)"
 fi
