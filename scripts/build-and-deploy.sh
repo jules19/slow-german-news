@@ -20,7 +20,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 KEEP_DAYS="${KEEP_DAYS:-3}"
-VENV_PATH="${VENV_PATH:-.venv}"
+VENV_PATH="${VENV_PATH:-.venv-qwen-tts}"
 GHPAGES_DIR="$PROJECT_DIR/.ghpages-worktree"
 LOG_FILE="$PROJECT_DIR/build.log"
 
