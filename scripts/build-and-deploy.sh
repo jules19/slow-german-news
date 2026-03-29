@@ -37,9 +37,16 @@ cd "$PROJECT_DIR"
 
 log "=== Starting build-and-deploy ==="
 
+# --- Load .env if present ---
+if [ -f "$PROJECT_DIR/.env" ]; then
+    set -a
+    source "$PROJECT_DIR/.env"
+    set +a
+fi
+
 # --- Validate environment ---
 if [ -z "${OPENAI_API_KEY:-}" ]; then
-    die "OPENAI_API_KEY is not set"
+    die "OPENAI_API_KEY is not set (add it to .env or set in environment)"
 fi
 
 if [ ! -d "$VENV_PATH" ]; then
